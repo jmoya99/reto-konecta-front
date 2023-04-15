@@ -1,7 +1,7 @@
 const baseURL = "http://localhost/konecta/api";
 
 const callWebService = async ({ endpoint, data, method, secure = true }) => {
-    const url = `${baseURL}/${endpoint}.php`;
+    let url = `${baseURL}/${endpoint}.php`;
     const peticion = {
         method,
     };

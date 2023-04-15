@@ -21,6 +21,8 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import BorderColorIcon from '@mui/icons-material/BorderColor';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
+import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
 
 // Components
 import ArticuloNew from './ArticuloModal.jsx';
@@ -28,9 +30,13 @@ import ArticuloNew from './ArticuloModal.jsx';
 // utilidades
 import { loadCategoriasAction } from '../../actions/categoryActions.js';
 import { loadArticulosAction, deleteArticuloAction } from '../../actions/articuloActions.js';
+import { loadLikesAction, insertLikeAction, deleteLikeAction } from '../../actions/likesActions.js';
 
 // estilos
 import "./ArticleStyle.css";
+
+// Contexto para estados globales
+import { useAppController,} from '../../context';
 
 const dominio = window.location.href.split("/inicio")[0];
 
@@ -40,6 +46,9 @@ const ArticuloList = () => {
     const [articlesList, setArticlesList] = useState([]);
     const [alertContent, setAlertContent] = useState({});
     const [dialogInfo, setDialogInfo] = useState({});
+
+    const [controller, dispatch] = useAppController();
+    const { userActive } = controller;
 
     const navigate = useNavigate();
 
@@ -68,11 +77,18 @@ const ArticuloList = () => {
             return;
         }
         const categories = await loadCategorisePromise;
+        const { likes } = await loadLikesAction();
         setCategoriesList(categories);
-        const dataParse = data.map((dat) => ({
-            ...dat,
-            titulo_categoria: _.get(categories.find((category) => category.id === dat.id_categoria), "titulo")
-        }));
+        const dataParse = data.map((dat) => {
+            const likesArticle = likes.filter((like) => like.id_articulo === dat.id_unico);
+            const userLike = !!likesArticle.find((like) => like.id_usuario === userActive.id);
+            return ({
+                ...dat,
+                titulo_categoria: _.get(categories.find((category) => category.id === dat.id_categoria), "titulo"),
+                cantidad_likes: likesArticle.length,
+                user_like: userLike,
+            })
+        });
         setArticlesList(dataParse);
     };
 
@@ -127,6 +143,40 @@ const ArticuloList = () => {
 
     const redirectArticulo = (slug) => navigate("/" + slug);
 
+    const retirarLike = async (id) => {
+        const data = {
+            id_articulo: id,
+            id_usuario: userActive.id
+        }
+        const { status } = await deleteLikeAction(data);
+        if(status === "success"){
+            loadArticulos();
+        }else{
+            setAlertContent({
+                open: true,
+                type: "error",
+                message: "Ocurrió un error, por favor intente nuevamente",
+            });
+        }
+    };
+
+    const darLike = async (id) => {
+        const data = {
+            id_articulo: id,
+            id_usuario: userActive.id
+        }
+        const { status } = await insertLikeAction(data);
+        if(status === "success"){
+            loadArticulos();
+        }else{
+            setAlertContent({
+                open: true,
+                type: "error",
+                message: "Ocurrió un error, por favor intente nuevamente",
+            });
+        }
+    };
+
     return (
         <Box m={2}>
             <Grid container mt={5} spacing={1}>
@@ -158,6 +208,20 @@ const ArticuloList = () => {
                                                 <VisibilityIcon />
                                             </IconButton>
                                         </Tooltip>
+                                        {article.user_like ? (
+                                            <Tooltip title="Retirar like">
+                                            <IconButton onClick={() => retirarLike(article.id_unico)}>
+                                                <ThumbUpAltIcon />
+                                            </IconButton>
+                                        </Tooltip>
+                                        ): (
+                                            <Tooltip title="Dar like">
+                                            <IconButton onClick={() => darLike(article.id_unico)}>
+                                                <ThumbUpOffAltIcon />
+                                            </IconButton>
+                                        </Tooltip>
+                                        )}
+                                        {article.cantidad_likes}
                                     </Grid>
                                     <Grid item xs={8}>
                                         <Typography variant="h5"> <b>{article.titulo}</b></Typography>
