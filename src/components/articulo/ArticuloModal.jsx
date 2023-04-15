@@ -31,7 +31,7 @@ import callWebService from '../../utils/callWS.js';
 import Alert from '../../customComponents/Alert.jsx';
 
 
-const ArticuloNew = ({ open, handleClose }) => {
+const ArticuloNew = ({ open, handleClose, infoArticulo, newArticulo }) => {
     const [categoriasList, setCategoriesList] = useState([]);
     const [category, setCategory] = useState('');
     const [title, setTitle] = useState('');
@@ -40,9 +40,15 @@ const ArticuloNew = ({ open, handleClose }) => {
     const [image, setImage] = useState('');
     const [alertContent, setAlertContent] = useState({});
 
-    const update = async (event) => {
-        event.preventDefault();
-    };
+    useEffect(() => {
+        if (!_.isEmpty(infoArticulo) && !newArticulo) {
+            setCategory(infoArticulo.id_categoria);
+            setTitle(infoArticulo.titulo);
+            setShortText(infoArticulo.texto_corto);
+            setLongText(infoArticulo.texto_largo);
+            setImage(infoArticulo.imagen);
+        }
+    }, [infoArticulo, newArticulo]);
 
     const setOpen = (value) => setAlertContent((prev) => ({ ...prev, open: false }));
 
@@ -123,9 +129,12 @@ const ArticuloNew = ({ open, handleClose }) => {
             texto_largo: longText,
             imagen: image,
         };
+        if(!newArticulo){
+            data.id_unico = infoArticulo.id_unico;
+        }
         try {
             const { status, msg: message} = await callWebService({
-                endpoint: 'articulo',
+                endpoint: newArticulo ? 'articulo' : 'actualizar-articulo',
                 method: 'POST',
                 data,
             });
@@ -142,7 +151,7 @@ const ArticuloNew = ({ open, handleClose }) => {
             setAlertContent({
                 open: true,
                 type: "error",
-                message: "Error al crear el articulo"
+                message: "Error llamando el servicio web"
             });
         }
     }
@@ -153,7 +162,7 @@ const ArticuloNew = ({ open, handleClose }) => {
                 <DialogContent>
                     <Grid container direction="column" alignItems="center" justifyContent="center" justify="center">
                         <Grid item xs={12}>
-                            <Typography variant="h4" align="center">Crear categoria</Typography>
+                            <Typography variant="h4" align="center">{newArticulo ? "Crear Articulo" : "Editar Articulo"}</Typography>
                         </Grid>
                         <Grid item xs={8} mt={2}>
                             <Box>
@@ -221,7 +230,7 @@ const ArticuloNew = ({ open, handleClose }) => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Cancelar</Button>
-                    <Button onClick={crearCategoria}>Crear</Button>
+                    <Button onClick={crearCategoria}>{newArticulo ? "Crear" : "Editar"}</Button>
                 </DialogActions>
             </Dialog>
             <Alert {...alertContent} setOpen={setOpen} />

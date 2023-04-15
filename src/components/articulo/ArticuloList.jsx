@@ -28,15 +28,10 @@ const dominio = window.location.href.split("/inicio")[0];
 
 
 const ArticuloList = () => {
-    const [open, setOpen] = useState(false);
     const [categoriesList, setCategoriesList] = useState([]);
     const [articlesList, setArticlesList] = useState([]);
     const [alertContent, setAlertContent] = useState({});
-
-    const handleClose = () => {
-        loadArticulos();
-        setOpen(false);
-    }
+    const [dialogInfo, setDialogInfo] = useState({});
 
     const loadCategories = async () => {
         const { status, msg, data } = await callWebService({
@@ -82,7 +77,28 @@ const ArticuloList = () => {
 
     useEffect(() => {
         loadArticulos();
-    }, [])
+    }, []);
+
+    const closeModalEdit = () => {
+        setDialogInfo((prev) => ({ ...prev, open: false }));
+        loadArticulos();
+    };
+
+    const openModalArticleEdit = (article) => {
+        setDialogInfo({
+            open: true,
+            infoArticulo: article,
+            handleClose: closeModalEdit,
+        })
+    }
+
+    const openModalArticleCreate = () => {
+        setDialogInfo({
+            open: true,
+            newArticulo: true,
+            handleClose: closeModalEdit,
+        })
+    }
 
     return (
         <Box m={2}>
@@ -104,7 +120,7 @@ const ArticuloList = () => {
                                     <Grid item xs={8}>
                                         <Typography variant="h5">
                                             <b>{article.titulo}</b>
-                                            <IconButton>
+                                            <IconButton onClick={() => openModalArticleEdit(article) }>
                                                 <BorderColorIcon />
                                             </IconButton>
                                         </Typography>
@@ -124,12 +140,12 @@ const ArticuloList = () => {
             <Tooltip title="Agregar nuevo articulo">
                 <IconButton
                     sx={{ position: 'absolute', color: 'white', top: '90%', right: '5%' }}
-                    onClick={() => setOpen(true)}
+                    onClick={openModalArticleCreate}
                 >
                     <AddCircleIcon fontSize='large' />
                 </IconButton>
             </Tooltip>
-            <ArticuloNew open={open} handleClose={handleClose} />
+            <ArticuloNew {...dialogInfo} />
         </Box>
     )
 };
