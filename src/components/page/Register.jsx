@@ -115,7 +115,7 @@ const Login = () => {
         };
         try {
             const { status, msg: message} = await callWS({
-                endpoint: 'register',
+                endpoint: 'usuario',
                 method: 'POST',
                 data,
                 secure: false
