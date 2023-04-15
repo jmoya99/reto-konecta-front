@@ -27,7 +27,45 @@ const UserList = () => {
 
     const setOpen = (value) => setAlertContent((prev) => ({ ...prev, open: false }));
 
-    const deleteUser = (id) => console.log(id); 
+    const loadData = async () => {
+        const { status, msg, users } = await callWebService({
+            endpoint: 'usuario',
+            method: 'GET',
+        });
+        if (status === "error") {
+            setAlertContent({
+                open: true,
+                type: status,
+                message: msg,
+            });
+            return;
+        }
+        const usersParse = users.map((user) => (
+            {
+                ...user,
+                fecha_creacion: moment(user['fecha_creacion']),
+                fecha_actualizacion: moment(user['fecha_actualizacion']),
+                acciones: user.id,
+            }
+        ))
+        setUsersList(users);
+    };
+
+    const deleteUser = async (id) => {
+        const { status, msg } = await callWebService({
+            endpoint: 'eliminar-usuario',
+            method: 'DELETE',
+            data: { id }
+        });
+        setAlertContent({
+            open: true,
+            type: status,
+            message: msg,
+        });
+        if(status === "success"){
+            loadData();
+        }
+    }; 
 
     const columns = [
         { field: 'id', headerName: 'ID', width: 90 },
@@ -52,30 +90,6 @@ const UserList = () => {
     ];
 
     useEffect(() => {
-        const loadData = async () => {
-            const { status, msg, users } = await callWebService({
-                endpoint: 'usuario',
-                method: 'GET',
-                secure: false
-            });
-            if (status === "error") {
-                setAlertContent({
-                    open: true,
-                    type: status,
-                    message: msg,
-                });
-                return;
-            }
-            const usersParse = users.map((user) => (
-                {
-                    ...user,
-                    fecha_creacion: moment(user['fecha_creacion']),
-                    fecha_actualizacion: moment(user['fecha_actualizacion']),
-                    acciones: user.id,
-                }
-            ))
-            setUsersList(users);
-        };
         loadData();
     }, []);
 
