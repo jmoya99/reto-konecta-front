@@ -18,6 +18,8 @@ import { useAppController } from '../../context';
 
 // componentes
 import UserList from '../user/UserList.jsx';
+import CategoryList from '../categoria/CategoryList.jsx';
+import ArticuloList from '../articulo/ArticuloList';
 
 const Dashboard = () => {
     const [controller] = useAppController();
@@ -25,7 +27,7 @@ const Dashboard = () => {
 
     const userIsAdmin = userActive.tipo_usuario == "Administrador";
 
-    const [ view, setView ] = useState(userIsAdmin ? 'users' : 'categories');
+    const [ view, setView ] = useState(userIsAdmin ? 'users' : 'articles');
 
     const buttonStyle = { my: 2, color: 'white', display: 'block' };
 
@@ -33,6 +35,10 @@ const Dashboard = () => {
         if(view === 'users'){
             return <UserList />
         }
+        if(view === 'categories'){
+            return <CategoryList />
+        }
+        return <ArticuloList />
     }
 
     const changeView = (vista) => setView(vista);

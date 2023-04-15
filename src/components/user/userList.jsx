@@ -18,9 +18,6 @@ import { DataGrid } from '@mui/x-data-grid';
 import Alert from '../../customComponents/Alert.jsx';
 import Swal from "sweetalert2";
 
-// import styles
-import "./UserStyle.css";
-
 // import utils
 import callWebService from '../../utils/callWS';
 
@@ -52,7 +49,6 @@ const UserList = () => {
                 ...user,
                 fecha_creacion: moment(user['fecha_creacion']),
                 fecha_actualizacion: moment(user['fecha_actualizacion']),
-                acciones: user.id,
             }
         ))
         setUsersList(users);
@@ -143,7 +139,7 @@ const UserList = () => {
     const columns = [
         { field: 'id', headerName: 'ID', width: 90 },
         { field: 'nombre', headerName: 'Nombre', width: 200 },
-        { field: 'correo_electronico', headerName: 'Correo Electronico', editable: true, width: 200 },
+        { field: 'correo_electronico', headerName: 'Correo Electronico', width: 200 },
         { field: 'numero_movil', headerName: 'Celular', width: 150 },
         { field: 'tipo_usuario', headerName: 'Tipo', width: 150 },
         { field: 'fecha_creacion', headerName: 'Fecha creación', width: 150 },

@@ -31,7 +31,7 @@ import callWS from '../../utils/callWS.js';
 import Alert from '../../customComponents/Alert.jsx';
 
 
-const UserEdit = ({ open, userInfo, handleClose }) => {
+const ArticuloNew = ({ open, userInfo, handleClose }) => {
     const [user, setUser] = useState('');
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
@@ -191,4 +191,4 @@ const UserEdit = ({ open, userInfo, handleClose }) => {
     );
 }
 
-export default UserEdit;
+export default ArticuloNew;
