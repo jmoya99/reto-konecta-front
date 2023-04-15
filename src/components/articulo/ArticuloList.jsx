@@ -59,10 +59,7 @@ const ArticuloList = () => {
     };
 
     const loadArticulos = async () => {
-        const loadCategorisePromise = new Promise(async (resolve) => {
-            const response = await loadCategories();
-            resolve(response);
-        });
+        const loadCategorisePromise = loadCategories();
         const { status, msg, data } = await callWebService({
             endpoint: 'articulo',
             method: 'GET',
