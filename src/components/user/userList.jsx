@@ -4,16 +4,19 @@ import moment from 'moment/moment.js';
 // Material ui components
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
 
 // Mateiral ui Icons
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import LockPersonIcon from '@mui/icons-material/LockPerson';
 
 // Material UI DataGrid for Table
 import { DataGrid } from '@mui/x-data-grid';
 
-// componentes customizados
+// Mensajes
 import Alert from '../../customComponents/Alert.jsx';
+import Swal from "sweetalert2";
 
 // import styles
 import "./UserStyle.css";
@@ -51,21 +54,31 @@ const UserList = () => {
         setUsersList(users);
     };
 
-    const deleteUser = async (id) => {
-        const { status, msg } = await callWebService({
-            endpoint: 'eliminar-usuario',
-            method: 'DELETE',
-            data: { id }
-        });
-        setAlertContent({
-            open: true,
-            type: status,
-            message: msg,
-        });
-        if(status === "success"){
-            loadData();
-        }
-    }; 
+    const deleteUser = (id) => {
+        Swal.fire({
+            title: '¿Está seguro que desea eliminar el usuario?',
+            showCancelButton: true,
+            confirmButtonText: 'Eliminar',
+            cancelButtonText: `Cancelar`,
+          }).then(async(result) => {
+            /* Read more about isConfirmed, isDenied below */
+            if (result.isConfirmed) {
+                const { status, msg } = await callWebService({
+                    endpoint: 'eliminar-usuario',
+                    method: 'DELETE',
+                    data: { id }
+                });
+                setAlertContent({
+                    open: true,
+                    type: status,
+                    message: msg,
+                });
+                if (status === "success") {
+                    loadData();
+                }
+            }
+          })
+    };
 
     const columns = [
         { field: 'id', headerName: 'ID', width: 90 },
@@ -78,12 +91,21 @@ const UserList = () => {
         {
             field: 'acciones', headerName: "Acciones", width: 150, renderCell: (param) => (
                 <>
-                    <IconButton onClick={() => deleteUser(param.row.id)}>
-                        <ModeEditIcon />
-                    </IconButton>
-                    <IconButton onClick={() => deleteUser(param.row.id)}>
-                        <DeleteIcon />
-                    </IconButton>
+                    <Tooltip title="Editar" >
+                        <IconButton onClick={() => deleteUser(param.row.id)}>
+                            <ModeEditIcon />
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Eliminar">
+                        <IconButton onClick={() => deleteUser(param.row.id)}>
+                            <DeleteIcon />
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Cambiar contraseña">
+                        <IconButton onClick={() => deleteUser(param.row.id)}>
+                            <LockPersonIcon />
+                        </IconButton>
+                    </Tooltip>
                 </>
             )
         }
