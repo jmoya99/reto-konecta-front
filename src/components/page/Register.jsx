@@ -31,7 +31,7 @@ import "./PageStyle.css";
 
 // utilidades
 import Regex from "../../utils/regex.js";
-import callWS from '../../utils/callWS.js';
+import { registerAction } from '../../actions/pageActions.js';
 
 const Register = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -114,12 +114,7 @@ const Register = () => {
             tipo_usuario: type,
         };
         try {
-            const { status, msg: message} = await callWS({
-                endpoint: 'usuario',
-                method: 'POST',
-                data,
-                secure: false
-            });
+            const { status, msg: message} = await registerAction(data);
             setAlertContent({
                 open: true,
                 type: status,

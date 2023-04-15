@@ -8,24 +8,19 @@ import TextField from '@mui/material/TextField';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Input from '@mui/material/Input';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
-import InputAdornment from '@mui/material/InputAdornment';
-import IconButton from '@mui/material/IconButton';
 import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 
 // utilidades
 import Regex from "../../utils/regex.js";
-import callWebService from '../../utils/callWS.js';
+import { loadCategoriasAction } from '../../actions/categoryActions.js';
+import { createArticuloAction, updateArticuloAction } from '../../actions/articuloActions.js';
 
 // componentes customizados
 import Alert from '../../customComponents/Alert.jsx';
@@ -41,22 +36,27 @@ const ArticuloNew = ({ open, handleClose, infoArticulo, newArticulo }) => {
     const [alertContent, setAlertContent] = useState({});
 
     useEffect(() => {
-        if (!_.isEmpty(infoArticulo) && !newArticulo) {
-            setCategory(infoArticulo.id_categoria);
-            setTitle(infoArticulo.titulo);
-            setShortText(infoArticulo.texto_corto);
-            setLongText(infoArticulo.texto_largo);
-            setImage(infoArticulo.imagen);
+        if (open) {
+            if (!_.isEmpty(infoArticulo) && !newArticulo) {
+                setCategory(infoArticulo.id_categoria);
+                setTitle(infoArticulo.titulo);
+                setShortText(infoArticulo.texto_corto);
+                setLongText(infoArticulo.texto_largo);
+                setImage(infoArticulo.imagen);
+            } else if (newArticulo) {
+                setCategory('');
+                setTitle('');
+                setShortText('');
+                setLongText('');
+                setImage('');
+            }
         }
-    }, [infoArticulo, newArticulo]);
+    }, [infoArticulo, newArticulo, open]);
 
     const setOpen = (value) => setAlertContent((prev) => ({ ...prev, open: false }));
 
     const loadCategories = async () => {
-        const { status, msg, data } = await callWebService({
-            endpoint: 'categoria',
-            method: 'GET',
-        });
+        const { status, msg, data } = await loadCategoriasAction();
         if (status === "error") {
             setAlertContent({
                 open: true,
@@ -129,21 +129,19 @@ const ArticuloNew = ({ open, handleClose, infoArticulo, newArticulo }) => {
             texto_largo: longText,
             imagen: image,
         };
-        if(!newArticulo){
+        if (!newArticulo) {
             data.id_unico = infoArticulo.id_unico;
         }
         try {
-            const { status, msg: message} = await callWebService({
-                endpoint: newArticulo ? 'articulo' : 'actualizar-articulo',
-                method: 'POST',
-                data,
-            });
+            const { status, msg: message } = await (newArticulo
+                ? createArticuloAction(data)
+                : updateArticuloAction(data));
             setAlertContent({
                 open: true,
                 type: status,
                 message
             });
-            if(status === "success"){
+            if (status === "success") {
                 handleClose();
             }
         } catch (error) {

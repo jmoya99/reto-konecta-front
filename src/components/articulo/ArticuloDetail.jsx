@@ -22,7 +22,8 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
 
 // utilidades
-import callWebService from '../../utils/callWS.js';
+import { loadCategoriasAction } from '../../actions/categoryActions.js';
+import { loadArticulosAction } from '../../actions/articuloActions.js';
 
 // Contexto para estados globales
 import { useAppController, setSesionActive } from '../../context';
@@ -49,10 +50,7 @@ const ArticuloDetail = () => {
     }
 
     const loadCategories = async () => {
-        const { status, msg, data } = await callWebService({
-            endpoint: 'categoria',
-            method: 'GET',
-        });
+        const { status, msg, data } = await loadCategoriasAction();
         if (status === "error") {
             setAlertContent({
                 open: true,
@@ -68,10 +66,7 @@ const ArticuloDetail = () => {
         setLoading(true);
         console.log("llamados", params.id);
         const loadCategorisePromise = loadCategories();
-        const { status, msg, data } = await callWebService({
-            endpoint: 'articulo',
-            method: 'GET',
-        });
+        const { status, msg, data } = await loadArticulosAction();
         if (status === "error") {
             setAlertContent({
                 open: true,

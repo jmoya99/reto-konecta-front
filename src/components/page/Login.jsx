@@ -27,7 +27,7 @@ import "./PageStyle.css";
 
 // utilidades
 import Regex from "../../utils/regex.js";
-import callWS from '../../utils/callWS.js';
+import { loginAction } from '../../actions/pageActions.js';
 
 // Contexto para funciones globales
 import { setSesionActive, setUserActive, useAppController } from '../../context/index.js';
@@ -82,12 +82,7 @@ const Login = () => {
             contrasena: password,
         }
         try {
-            const { status, msg: message, data: dataRes } = await callWS({
-                endpoint: 'login',
-                method: 'POST',
-                data,
-                secure: false
-            });
+            const { status, msg: message, data: dataRes } = await loginAction(data);
             if (status === "success") {
                 logginIn(dataRes);
             }

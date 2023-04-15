@@ -25,7 +25,7 @@ import MenuItem from '@mui/material/MenuItem';
 
 // utilidades
 import Regex from "../../utils/regex.js";
-import callWS from '../../utils/callWS.js';
+import { updateUserAction } from "../../actions/userActions.js"
 
 // componentes customizados
 import Alert from '../../customComponents/Alert.jsx';
@@ -100,11 +100,7 @@ const UserEdit = ({ open, userInfo, handleClose }) => {
             tipo_usuario: type,
         };
         try {
-            const { status, msg: message} = await callWS({
-                endpoint: 'actualizar-usuario',
-                method: 'POST',
-                data,
-            });
+            const { status, msg: message} = await updateUserAction(data);
             setAlertContent({
                 open: true,
                 type: status,

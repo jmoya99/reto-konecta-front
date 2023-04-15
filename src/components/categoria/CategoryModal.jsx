@@ -7,25 +7,17 @@ import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Input from '@mui/material/Input';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
-import InputAdornment from '@mui/material/InputAdornment';
-import IconButton from '@mui/material/IconButton';
-import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
+import Box from '@mui/material/Box';;
 import TextField from '@mui/material/TextField';
 
 // utilidades
 import Regex from "../../utils/regex.js";
-import callWS from '../../utils/callWS.js';
+import { createCategoriaAction, updateCategoriaAction } from '../../actions/categoryActions.js';
 
 // componentes customizados
 import Alert from '../../customComponents/Alert.jsx';
@@ -37,11 +29,16 @@ const CategoryModal = ({ open, categoryInfo, handleClose, newCategory }) => {
     const [alertContent, setAlertContent] = useState({});
 
     useEffect(() => {
-        if (!_.isEmpty(categoryInfo) && !newCategory) {
-            setTitle(categoryInfo.titulo);
-            setDescription(categoryInfo.descripcion);
+        if (open) {
+            if (!_.isEmpty(categoryInfo) && !newCategory) {
+                setTitle(categoryInfo.titulo);
+                setDescription(categoryInfo.descripcion);
+            } else if (newCategory) {
+                setTitle('');
+                setDescription('');
+            }
         }
-    }, [categoryInfo, newCategory]);
+    }, [categoryInfo, newCategory, open]);
 
     const validate = () => {
         if (!title.trim()) {
@@ -78,11 +75,9 @@ const CategoryModal = ({ open, categoryInfo, handleClose, newCategory }) => {
             data.id = categoryInfo.id;
         }
         try {
-            const { status, msg: message } = await callWS({
-                endpoint: newCategory ? 'categoria' : 'actualizar-categoria',
-                method: 'POST',
-                data,
-            });
+            const { status, msg: message } = await (newCategory
+                ? createCategoriaAction(data)
+                : updateCategoriaAction(data));
             setAlertContent({
                 open: true,
                 type: status,

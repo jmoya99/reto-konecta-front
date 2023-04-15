@@ -18,7 +18,7 @@ import Alert from '../../customComponents/Alert.jsx';
 import Swal from "sweetalert2";
 
 // import utils
-import callWebService from '../../utils/callWS';
+import { loadCategoriasAction, deleteCategoriaAction } from '../../actions/categoryActions.js';
 
 // Components
 import CategoryModal from './CategoryModal.jsx';
@@ -32,10 +32,7 @@ const UserList = () => {
     const setOpen = (value) => setAlertContent((prev) => ({ ...prev, open: false }));
 
     const loadData = async () => {
-        const { status, msg, data } = await callWebService({
-            endpoint: 'categoria',
-            method: 'GET',
-        });
+        const { status, msg, data } = await loadCategoriasAction();
         if (status === "error") {
             setAlertContent({
                 open: true,
@@ -56,18 +53,22 @@ const UserList = () => {
         }).then(async (result) => {
             /* Read more about isConfirmed, isDenied below */
             if (result.isConfirmed) {
-                const { status, msg } = await callWebService({
-                    endpoint: 'eliminar-categoria',
-                    method: 'DELETE',
-                    data: { id }
-                });
-                setAlertContent({
-                    open: true,
-                    type: status,
-                    message: msg,
-                });
-                if (status === "success") {
-                    loadData();
+                try {
+                    const { status, msg } = await deleteCategoriaAction(id);
+                    setAlertContent({
+                        open: true,
+                        type: status,
+                        message: msg,
+                    });
+                    if (status === "success") {
+                        loadData();
+                    }
+                } catch (error) {
+                    setAlertContent({
+                        open: true,
+                        type: "error",
+                        message: "No se puede eliminar una categoria seleccionada en un articulo",
+                    });
                 }
             }
         })

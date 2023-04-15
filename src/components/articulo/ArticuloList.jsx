@@ -26,7 +26,8 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import ArticuloNew from './ArticuloModal.jsx';
 
 // utilidades
-import callWebService from '../../utils/callWS.js';
+import { loadCategoriasAction } from '../../actions/categoryActions.js';
+import { loadArticulosAction, deleteArticuloAction } from '../../actions/articuloActions.js';
 
 // estilos
 import "./ArticleStyle.css";
@@ -43,10 +44,7 @@ const ArticuloList = () => {
     const navigate = useNavigate();
 
     const loadCategories = async () => {
-        const { status, msg, data } = await callWebService({
-            endpoint: 'categoria',
-            method: 'GET',
-        });
+        const { status, msg, data } = await loadCategoriasAction();
         if (status === "error") {
             setAlertContent({
                 open: true,
@@ -60,10 +58,7 @@ const ArticuloList = () => {
 
     const loadArticulos = async () => {
         const loadCategorisePromise = loadCategories();
-        const { status, msg, data } = await callWebService({
-            endpoint: 'articulo',
-            method: 'GET',
-        });
+        const { status, msg, data } = await loadArticulosAction();
         if (status === "error") {
             setAlertContent({
                 open: true,
@@ -115,11 +110,7 @@ const ArticuloList = () => {
         }).then(async (result) => {
             /* Read more about isConfirmed, isDenied below */
             if (result.isConfirmed) {
-                const { status, msg } = await callWebService({
-                    endpoint: 'eliminar-articulo',
-                    method: 'DELETE',
-                    data: { id_unico: id }
-                });
+                const { status, msg } = await deleteArticuloAction(id);
                 setAlertContent({
                     open: true,
                     type: status,

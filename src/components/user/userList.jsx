@@ -19,7 +19,7 @@ import Alert from '../../customComponents/Alert.jsx';
 import Swal from "sweetalert2";
 
 // import utils
-import callWebService from '../../utils/callWS';
+import { loadUsersAction, deleteUserAction } from '../../actions/userActions.js';
 
 // components
 import UserEdit from './UserEdit.jsx';
@@ -32,10 +32,7 @@ const UserList = () => {
     const setOpen = (value) => setAlertContent((prev) => ({ ...prev, open: false }));
 
     const loadData = async () => {
-        const { status, msg, users } = await callWebService({
-            endpoint: 'usuario',
-            method: 'GET',
-        });
+        const { status, msg, users } = await loadUsersAction();
         if (status === "error") {
             setAlertContent({
                 open: true,
@@ -63,11 +60,7 @@ const UserList = () => {
           }).then(async(result) => {
             /* Read more about isConfirmed, isDenied below */
             if (result.isConfirmed) {
-                const { status, msg } = await callWebService({
-                    endpoint: 'eliminar-usuario',
-                    method: 'DELETE',
-                    data: { id }
-                });
+                const { status, msg } = await deleteUserAction(id);
                 setAlertContent({
                     open: true,
                     type: status,
@@ -184,7 +177,7 @@ const UserList = () => {
                             },
                         },
                     }}
-                    pageSizeOptions={[5]}
+                    pageSizeOptions={[5, 10, 20]}
                     disableRowSelectionOnClick
                 />
             </Box>
