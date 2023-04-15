@@ -9,6 +9,7 @@ const PageLayout = ({ children }) => {
         <Box className="background">
             {children}
         </Box>
+
     );
 }
 

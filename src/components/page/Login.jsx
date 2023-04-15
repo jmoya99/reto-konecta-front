@@ -29,6 +29,9 @@ import "./PageStyle.css";
 import Regex from "../../utils/regex.js";
 import callWS from '../../utils/callWS.js';
 
+// Contexto para funciones globales
+import { setSesionActive, setUserActive, useAppController } from '../../context/index.js';
+
 const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [user, setUser] = useState('');
@@ -37,6 +40,7 @@ const Login = () => {
 
     const navigate = useNavigate();
 
+    const [controller, dispatch] = useAppController();
 
     const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -78,14 +82,14 @@ const Login = () => {
             contrasena: password,
         }
         try {
-            const { status, msg: message } = await callWS({
+            const { status, msg: message, data: dataRes } = await callWS({
                 endpoint: 'login',
                 method: 'POST',
                 data,
                 secure: false
             });
             if (status === "success") {
-                return navigate('/inicio');
+                logginIn(dataRes);
             }
             setAlertContent({
                 open: true,
@@ -101,6 +105,14 @@ const Login = () => {
             });
         }
     }
+
+    const logginIn = ({ jwt, data }) => {
+        setUserActive(dispatch, data);
+        setSesionActive(dispatch, true);
+        localStorage.setItem('token', jwt)
+    }
+
+    const sendToRegister = () => navigate('/register');
 
     const setOpen = (value) => setAlertContent((prev) => ({ ...prev, open: false }));
 
@@ -151,7 +163,7 @@ const Login = () => {
                                     </Button>
                                 </Box>
                                 <Box align="center" mt={2}>
-                                    <Link underline='none' color="black" href="register">¿No tienes una cuenta?</Link>
+                                    <Typography sx={{ cursor: 'pointer' }} onClick={sendToRegister}>¿No tienes una cuenta?</Typography>
                                 </Box>
                             </Grid>
                         </Grid>

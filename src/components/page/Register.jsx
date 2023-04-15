@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 
+import { useNavigate } from 'react-router-dom';
+
 // Componentes de Material ui
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -39,6 +41,8 @@ const Login = () => {
     const [phone, setPhone] = useState('');
     const [type, setType] = useState('');
     const [alertContent, setAlertContent] = useState({});
+
+    const navigate = useNavigate();
 
 
     const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -135,6 +139,8 @@ const Login = () => {
 
     const setOpen = (value) => setAlertContent((prev) => ({ ...prev, open: false }));
 
+    const sendToLogin = () => navigate('/');
+
     return (
         <Grid container mt={10} direction="row" alignItems="center" justifyContent="center" justify="center">
             <Grid item xs={12} md={6}>
@@ -217,7 +223,7 @@ const Login = () => {
                                     </Button>
                                 </Box>
                                 <Box align="center" mt={2}>
-                                    <Link underline='none' color="black" href="/">¿Ya tienes una cuenta?</Link>
+                                <Typography sx={{ cursor: 'pointer' }} onClick={sendToLogin}>¿Ya tienes una cuenta?</Typography>
                                 </Box>
                             </Grid>
                         </Grid>

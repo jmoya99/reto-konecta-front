@@ -1,26 +1,50 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 // Librería para el enrutamiento
-import { Routes, Route, BrowserRouter } from "react-router-dom";
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 
 // Layout
 import PageLayout from './layouts/PageLayout.jsx';
 
-// Componentes
-import Login from './components/user/Login.jsx';
-import Register from './components/user/Register.jsx';
+// rutas del aplicativo
+import publicRoutes from './routes/public.js';
+import privateRoutes from './routes/private.js';
+
+// Contexto para estados globales
+import { useAppController } from './context';
 
 const App = () => {
+
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+
+  const [controller] = useAppController();
+
+  const { sesionActive } = controller;
+
+  const [routes, setRoutes] = useState(publicRoutes);
+
+  // defino cuales son las rutas publicas
+  const publicPages = ['', 'register'];
+
+  useEffect(() => {
+    const route = pathname.split("/");
+    if(sesionActive && publicPages.includes(route[1])){
+      setRoutes(privateRoutes);
+      navigate('/inicio');
+    }else if(!sesionActive && !publicPages.includes(route[1])){
+      setRoutes(publicRoutes);
+      navigate('/');
+    }
+  }, [sesionActive, pathname]);
+
   return (
     <React.StrictMode>
-      <BrowserRouter>
         <PageLayout>
           <Routes>
-            <Route path="/" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            {routes.map((route) => ( <Route path={route.path} element={route.element} key={route.path} />))}
           </Routes>
         </PageLayout>
-      </BrowserRouter>
     </React.StrictMode>
   );
 }

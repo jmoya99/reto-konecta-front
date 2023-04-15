@@ -16,7 +16,6 @@ const callWebService = async ({ endpoint, data, method, secure = true }) => {
         };
     }
     const response = await fetch(url, peticion);
-    console.log(response);
     return response.json();
 }
 
