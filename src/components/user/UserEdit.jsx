@@ -170,7 +170,7 @@ const UserEdit = ({ open, userInfo, handleClose }) => {
                                         labelId="typelabel"
                                         id="typeSelect"
                                         value={type}
-                                        label="Age"
+                                        label="Tipo de usuario"
                                         onChange={(e) => setType(e.target.value)}
                                     >
                                         <MenuItem value="Administrador">Administrador</MenuItem>

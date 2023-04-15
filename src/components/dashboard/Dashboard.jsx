@@ -14,7 +14,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
 
 // Contexto para estados globales
-import { useAppController } from '../../context';
+import { useAppController, setSesionActive } from '../../context';
 
 // componentes
 import UserList from '../user/UserList.jsx';
@@ -22,7 +22,7 @@ import CategoryList from '../categoria/CategoryList.jsx';
 import ArticuloList from '../articulo/ArticuloList';
 
 const Dashboard = () => {
-    const [controller] = useAppController();
+    const [controller, dispatch] = useAppController();
     const { userActive } = controller;
 
     const userIsAdmin = userActive.tipo_usuario == "Administrador";
@@ -42,6 +42,11 @@ const Dashboard = () => {
     }
 
     const changeView = (vista) => setView(vista);
+
+    const logout = () => {
+        setSesionActive(dispatch, false);
+        localStorage.removeItem("token");
+    }
 
     return (
         <Box>
@@ -77,8 +82,8 @@ const Dashboard = () => {
                             <Typography>
                                 <AccountCircleIcon sx={{ mb: -0.5, mr: 0.5 }} />
                                 {userActive.nombre}
-                                <IconButton sx={{ color: 'white' }}>
-                                    <LogoutIcon />
+                                <IconButton sx={{ color: 'white' }} onClick={logout}>
+                                    <LogoutIcon/>
                                 </IconButton>
                             </Typography>
                         </Box>
