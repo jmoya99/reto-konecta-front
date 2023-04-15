@@ -17,8 +17,15 @@ const updateUserAction = (data) => callWebService({
     data,
 });
 
+const updatePasswordUserAction = (data) => callWebService({
+    endpoint: 'actualizar-contrasena',
+    method: 'POST',
+    data,
+});
+
 export {
     loadUsersAction,
     deleteUserAction,
-    updateUserAction
+    updateUserAction,
+    updatePasswordUserAction
 }

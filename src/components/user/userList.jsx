@@ -19,7 +19,7 @@ import Alert from '../../customComponents/Alert.jsx';
 import Swal from "sweetalert2";
 
 // import utils
-import { loadUsersAction, deleteUserAction } from '../../actions/userActions.js';
+import { loadUsersAction, deleteUserAction, updatePasswordUserAction } from '../../actions/userActions.js';
 
 // components
 import UserEdit from './UserEdit.jsx';
@@ -93,13 +93,8 @@ const UserList = () => {
                     id,
                     contrasena: result.value,
                 };
-                console.log(data);
                 try {
-                    const { status, msg: message} = await callWebService({
-                        endpoint: 'actualizar-contrasena',
-                        method: 'POST',
-                        data,
-                    });
+                    const { status, msg: message} = await updatePasswordUserAction(data);
                     setAlertContent({
                         open: true,
                         type: status,

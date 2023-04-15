@@ -15,6 +15,7 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
+import Badge from '@mui/material/Badge';
 
 // Material UI Icons
 import AddCircleIcon from '@mui/icons-material/AddCircle';
@@ -23,20 +24,24 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
+import AddCommentIcon from '@mui/icons-material/AddComment';
+import ForumIcon from '@mui/icons-material/Forum';
 
 // Components
 import ArticuloNew from './ArticuloModal.jsx';
+import ComentarioModal from './ComentarioModal.jsx';
 
 // utilidades
 import { loadCategoriasAction } from '../../actions/categoryActions.js';
 import { loadArticulosAction, deleteArticuloAction } from '../../actions/articuloActions.js';
 import { loadLikesAction, insertLikeAction, deleteLikeAction } from '../../actions/likesActions.js';
+import { insertComentarioAction, loadComentarioAction } from '../../actions/comentarioActions.js';
 
 // estilos
 import "./ArticleStyle.css";
 
 // Contexto para estados globales
-import { useAppController,} from '../../context';
+import { useAppController, } from '../../context';
 
 const dominio = window.location.href.split("/inicio")[0];
 
@@ -46,6 +51,7 @@ const ArticuloList = () => {
     const [articlesList, setArticlesList] = useState([]);
     const [alertContent, setAlertContent] = useState({});
     const [dialogInfo, setDialogInfo] = useState({});
+    const [currentArticle, setCurrentArticle] = useState({});
 
     const [controller, dispatch] = useAppController();
     const { userActive } = controller;
@@ -78,15 +84,18 @@ const ArticuloList = () => {
         }
         const categories = await loadCategorisePromise;
         const { likes } = await loadLikesAction();
+        const { comentarios } = await loadComentarioAction();
         setCategoriesList(categories);
         const dataParse = data.map((dat) => {
             const likesArticle = likes.filter((like) => like.id_articulo === dat.id_unico);
             const userLike = !!likesArticle.find((like) => like.id_usuario === userActive.id);
+            const cantidadComentarios = comentarios.filter((comentario) => comentario.id_articulo === dat.id_unico).length
             return ({
                 ...dat,
                 titulo_categoria: _.get(categories.find((category) => category.id === dat.id_categoria), "titulo"),
                 cantidad_likes: likesArticle.length,
                 user_like: userLike,
+                cantidad_comentarios: cantidadComentarios,
             })
         });
         setArticlesList(dataParse);
@@ -149,9 +158,9 @@ const ArticuloList = () => {
             id_usuario: userActive.id
         }
         const { status } = await deleteLikeAction(data);
-        if(status === "success"){
+        if (status === "success") {
             loadArticulos();
-        }else{
+        } else {
             setAlertContent({
                 open: true,
                 type: "error",
@@ -166,9 +175,9 @@ const ArticuloList = () => {
             id_usuario: userActive.id
         }
         const { status } = await insertLikeAction(data);
-        if(status === "success"){
+        if (status === "success") {
             loadArticulos();
-        }else{
+        } else {
             setAlertContent({
                 open: true,
                 type: "error",
@@ -176,6 +185,59 @@ const ArticuloList = () => {
             });
         }
     };
+
+    const comentar = (id) => {
+        Swal.fire({
+            title: 'Ingrese el comentario',
+            input: 'text',
+            showCancelButton: true,
+            confirmButtonText: 'Comentar',
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                if (!result.value.trim()) {
+                    setAlertContent({
+                        open: true,
+                        type: 'error',
+                        message: "El comentario no puede ser vacio"
+                    });
+                    return;
+                }
+                const data = {
+                    id_articulo: id,
+                    id_usuario: userActive.id,
+                    texto: result.value,
+                };
+                try {
+                    const { status, msg: message } = await insertComentarioAction(data);
+                    setAlertContent({
+                        open: true,
+                        type: status,
+                        message
+                    });
+                    if(status === "success"){
+                        loadArticulos();
+                    }
+                } catch (error) {
+                    setAlertContent({
+                        open: true,
+                        type: "error",
+                        message: error.reason
+                    });
+                }
+            }
+        })
+    }
+
+    const openModalComentarios = (id) => setCurrentArticle({
+        open: true,
+        handleClose: handleCloseComments,
+        id_articulo: id
+    });
+
+    const handleCloseComments = () => { 
+        setCurrentArticle((prev) => ({ ...prev, open: false }));
+        loadArticulos();
+     }
 
     return (
         <Box m={2}>
@@ -193,6 +255,20 @@ const ArticuloList = () => {
                                             height="150"
                                             className="imagen"
                                         />
+                                    </Grid>
+                                    <Grid item xs={8}>
+                                        <Typography variant="h5"> <b>{article.titulo}</b></Typography>
+                                        <Typography variant="body2"><b>Categoria: </b></Typography>
+                                        <Typography variant="body2">{article.titulo_categoria}</Typography>
+                                        <Typography variant="body2"><b>Texto corto</b></Typography>
+                                        <Typography variant="body2">{article.texto_corto}</Typography>
+                                        <Typography variant="body2"><b>slug</b></Typography>
+                                        <Typography
+                                            variant="body2"
+                                            sx={{ cursor: 'pointer', color: 'blue' }}
+                                            onClick={() => redirectArticulo(article.slug)}>{dominio + "/" + article.slug}</Typography>
+                                    </Grid>
+                                    <Grid item xs={12} mt={1}>
                                         <Tooltip title="Editar articulo">
                                             <IconButton onClick={() => openModalArticleEdit(article)}>
                                                 <BorderColorIcon />
@@ -210,30 +286,33 @@ const ArticuloList = () => {
                                         </Tooltip>
                                         {article.user_like ? (
                                             <Tooltip title="Retirar like">
-                                            <IconButton onClick={() => retirarLike(article.id_unico)}>
-                                                <ThumbUpAltIcon />
-                                            </IconButton>
-                                        </Tooltip>
-                                        ): (
+                                                <IconButton onClick={() => retirarLike(article.id_unico)}>
+                                                    <Badge badgeContent={<span>{article.cantidad_likes}</span>} color="primary">
+                                                        <ThumbUpAltIcon />
+                                                    </Badge>
+                                                </IconButton>
+                                            </Tooltip>
+                                        ) : (
                                             <Tooltip title="Dar like">
-                                            <IconButton onClick={() => darLike(article.id_unico)}>
-                                                <ThumbUpOffAltIcon />
+                                                <IconButton onClick={() => darLike(article.id_unico)}>
+                                                    <Badge badgeContent={<span>{article.cantidad_likes}</span>} color="primary">
+                                                        <ThumbUpOffAltIcon />
+                                                    </Badge>
+                                                </IconButton>
+                                            </Tooltip>
+                                        )}
+                                        <Tooltip title="Agregar comentario">
+                                            <IconButton onClick={() => comentar(article.id_unico)}>
+                                                <AddCommentIcon />
                                             </IconButton>
                                         </Tooltip>
-                                        )}
-                                        {article.cantidad_likes}
-                                    </Grid>
-                                    <Grid item xs={8}>
-                                        <Typography variant="h5"> <b>{article.titulo}</b></Typography>
-                                        <Typography variant="body2"><b>Categoria: </b></Typography>
-                                        <Typography variant="body2">{article.titulo_categoria}</Typography>
-                                        <Typography variant="body2"><b>Texto corto</b></Typography>
-                                        <Typography variant="body2">{article.texto_corto}</Typography>
-                                        <Typography variant="body2"><b>slug</b></Typography>
-                                        <Typography
-                                            variant="body2"
-                                            sx={{ cursor: 'pointer', color: 'blue' }}
-                                            onClick={() => redirectArticulo(article.slug)}>{dominio + "/" + article.slug}</Typography>
+                                        <Tooltip title="Ver comentarios">
+                                            <IconButton onClick={() => openModalComentarios(article.id_unico)}>
+                                                <Badge badgeContent={<span>{article.cantidad_comentarios}</span>} color="success">
+                                                    <ForumIcon />
+                                                </Badge>
+                                            </IconButton>
+                                        </Tooltip>
                                     </Grid>
                                 </Grid>
                             </CardContent>
@@ -251,6 +330,7 @@ const ArticuloList = () => {
             </Tooltip>
             <ArticuloNew {...dialogInfo} />
             <Alert {...alertContent} setOpen={setOpen} />
+            <ComentarioModal {...currentArticle} />
         </Box>
     )
 };
