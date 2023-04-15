@@ -24,9 +24,13 @@ import "./UserStyle.css";
 // import utils
 import callWebService from '../../utils/callWS';
 
+// components
+import UserEdit from './UserEdit.jsx';
+
 const UserList = () => {
     const [usersList, setUsersList] = useState([]);
     const [alertContent, setAlertContent] = useState({});
+    const [dialogInfo, setDialogInfo] = useState({});
 
     const setOpen = (value) => setAlertContent((prev) => ({ ...prev, open: false }));
 
@@ -80,6 +84,19 @@ const UserList = () => {
           })
     };
 
+    const closeModalEdit = () => { 
+        setDialogInfo((prev) => ({ ...prev, open: false}));
+        loadData();
+    };
+
+    const edituser = (user) => {
+        setDialogInfo({
+            open: true,
+            userInfo: user,
+            handleClose: closeModalEdit,
+        })
+    }
+
     const columns = [
         { field: 'id', headerName: 'ID', width: 90 },
         { field: 'nombre', headerName: 'Nombre', width: 200 },
@@ -92,7 +109,7 @@ const UserList = () => {
             field: 'acciones', headerName: "Acciones", width: 150, renderCell: (param) => (
                 <>
                     <Tooltip title="Editar" >
-                        <IconButton onClick={() => deleteUser(param.row.id)}>
+                        <IconButton onClick={() => edituser(param.row)}>
                             <ModeEditIcon />
                         </IconButton>
                     </Tooltip>
@@ -132,7 +149,8 @@ const UserList = () => {
                     disableRowSelectionOnClick
                 />
             </Box>
-            <Alert open={alertContent.open} type={alertContent.type} message={alertContent.message} setOpen={setOpen} />
+            <Alert {...alertContent} setOpen={setOpen} />
+            <UserEdit {...dialogInfo} />
         </>
     )
 }

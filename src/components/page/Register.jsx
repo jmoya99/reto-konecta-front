@@ -33,7 +33,7 @@ import "./PageStyle.css";
 import Regex from "../../utils/regex.js";
 import callWS from '../../utils/callWS.js';
 
-const Login = () => {
+const Register = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [user, setUser] = useState('');
     const [password, setPassword] = useState('');
@@ -229,10 +229,10 @@ const Login = () => {
                         </Grid>
                     </CardContent>
                 </Card>
-                <Alert open={alertContent.open} type={alertContent.type} message={alertContent.message} setOpen={setOpen} />
+                <Alert {...alertContent} setOpen={setOpen} />
             </Grid>
         </Grid>
     )
 }
 
-export default Login;
+export default Register;
