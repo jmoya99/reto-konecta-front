@@ -8,6 +8,7 @@ import PageLayout from './layouts/PageLayout.jsx';
 
 // Componentes
 import Login from './components/user/Login.jsx';
+import Register from './components/user/Register.jsx';
 
 const App = () => {
   return (
@@ -16,6 +17,7 @@ const App = () => {
         <PageLayout>
           <Routes>
             <Route path="/" element={<Login />} />
+            <Route path="/register" element={<Register />} />
           </Routes>
         </PageLayout>
       </BrowserRouter>

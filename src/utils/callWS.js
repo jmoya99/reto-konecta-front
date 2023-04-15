@@ -1,7 +1,7 @@
 const baseURL = "http://localhost/konecta/api";
 
-const callWebService = (endpoint, data, method, secure = true) => {
-    const url = `${baseURL}${endpoint}`;
+const callWebService = async ({ endpoint, data, method, secure = true }) => {
+    const url = `${baseURL}/${endpoint}.php`;
     const peticion = {
         method,
     };
@@ -15,7 +15,9 @@ const callWebService = (endpoint, data, method, secure = true) => {
             "Content-Type": "application/json",
         };
     }
-    return fetch(url, peticion);
+    const response = await fetch(url, peticion);
+    console.log(response);
+    return response.json();
 }
 
 export default callWebService;
