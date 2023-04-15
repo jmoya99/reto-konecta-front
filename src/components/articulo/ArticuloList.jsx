@@ -1,6 +1,11 @@
 import _ from 'lodash';
 
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+// Mensajes
+import Alert from '../../customComponents/Alert.jsx';
+import Swal from "sweetalert2";
 
 // Material UI Components
 import Tooltip from '@mui/material/Tooltip';
@@ -14,6 +19,8 @@ import Box from '@mui/material/Box';
 // Material UI Icons
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import BorderColorIcon from '@mui/icons-material/BorderColor';
+import DeleteIcon from '@mui/icons-material/Delete';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 // Components
 import ArticuloNew from './ArticuloModal.jsx';
@@ -32,6 +39,8 @@ const ArticuloList = () => {
     const [articlesList, setArticlesList] = useState([]);
     const [alertContent, setAlertContent] = useState({});
     const [dialogInfo, setDialogInfo] = useState({});
+
+    const navigate = useNavigate();
 
     const loadCategories = async () => {
         const { status, msg, data } = await callWebService({
@@ -100,6 +109,36 @@ const ArticuloList = () => {
         })
     }
 
+    const deleteArticulo = (id) => {
+        Swal.fire({
+            title: '¿Está seguro que desea eliminar el articulo?',
+            showCancelButton: true,
+            confirmButtonText: 'Eliminar',
+            cancelButtonText: `Cancelar`,
+        }).then(async (result) => {
+            /* Read more about isConfirmed, isDenied below */
+            if (result.isConfirmed) {
+                const { status, msg } = await callWebService({
+                    endpoint: 'eliminar-articulo',
+                    method: 'DELETE',
+                    data: { id_unico: id }
+                });
+                setAlertContent({
+                    open: true,
+                    type: status,
+                    message: msg,
+                });
+                if (status === "success") {
+                    loadArticulos();
+                }
+            }
+        })
+    };
+
+    const setOpen = (value) => setAlertContent((prev) => ({ ...prev, open: false }));
+
+    const redirectArticulo = (slug) => navigate("/" + slug);
+
     return (
         <Box m={2}>
             <Grid container mt={5} spacing={1}>
@@ -116,20 +155,33 @@ const ArticuloList = () => {
                                             height="150"
                                             className="imagen"
                                         />
-                                    </Grid>
-                                    <Grid item xs={8}>
-                                        <Typography variant="h5">
-                                            <b>{article.titulo}</b>
-                                            <IconButton onClick={() => openModalArticleEdit(article) }>
+                                        <Tooltip title="Editar articulo">
+                                            <IconButton onClick={() => openModalArticleEdit(article)}>
                                                 <BorderColorIcon />
                                             </IconButton>
-                                        </Typography>
+                                        </Tooltip>
+                                        <Tooltip title="Eliminar articulo">
+                                            <IconButton onClick={() => deleteArticulo(article.id_unico)}>
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        </Tooltip>
+                                        <Tooltip title="ver más">
+                                            <IconButton onClick={() => redirectArticulo(article.slug)}>
+                                                <VisibilityIcon />
+                                            </IconButton>
+                                        </Tooltip>
+                                    </Grid>
+                                    <Grid item xs={8}>
+                                        <Typography variant="h5"> <b>{article.titulo}</b></Typography>
                                         <Typography variant="body2"><b>Categoria: </b></Typography>
                                         <Typography variant="body2">{article.titulo_categoria}</Typography>
                                         <Typography variant="body2"><b>Texto corto</b></Typography>
                                         <Typography variant="body2">{article.texto_corto}</Typography>
                                         <Typography variant="body2"><b>slug</b></Typography>
-                                        <Typography variant="body2" sx={{ cursor: 'pointer', color: 'blue' }}>{dominio+"/"+article.slug}</Typography>
+                                        <Typography
+                                            variant="body2"
+                                            sx={{ cursor: 'pointer', color: 'blue' }}
+                                            onClick={() => redirectArticulo(article.slug)}>{dominio + "/" + article.slug}</Typography>
                                     </Grid>
                                 </Grid>
                             </CardContent>
@@ -146,6 +198,7 @@ const ArticuloList = () => {
                 </IconButton>
             </Tooltip>
             <ArticuloNew {...dialogInfo} />
+            <Alert {...alertContent} setOpen={setOpen} />
         </Box>
     )
 };

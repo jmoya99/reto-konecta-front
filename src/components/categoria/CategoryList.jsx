@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import moment from 'moment/moment.js';
 
 // Material ui components
 import Box from '@mui/material/Box';

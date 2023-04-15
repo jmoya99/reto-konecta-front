@@ -19,7 +19,7 @@ import { useAppController, setSesionActive } from '../../context';
 // componentes
 import UserList from '../user/UserList.jsx';
 import CategoryList from '../categoria/CategoryList.jsx';
-import ArticuloList from '../articulo/ArticuloList';
+import ArticuloList from '../articulo/ArticuloList.jsx';
 
 const Dashboard = () => {
     const [controller, dispatch] = useAppController();
@@ -27,7 +27,7 @@ const Dashboard = () => {
 
     const userIsAdmin = userActive.tipo_usuario == "Administrador";
 
-    const [ view, setView ] = useState(userIsAdmin ? 'users' : 'articles');
+    const [ view, setView ] = useState('articles');
 
     const buttonStyle = { my: 2, color: 'white', display: 'block' };
 
