@@ -84,6 +84,49 @@ const UserList = () => {
           })
     };
 
+    const changePassword = (id) => {
+        Swal.fire({
+            title: 'Ingrese la nueva contraseña',
+            input: 'text',
+            showCancelButton: true,
+            confirmButtonText: 'Cambiar',
+          }).then(async (result) => {
+            if (result.isConfirmed) {
+                if(!result.value.trim()){
+                    setAlertContent({
+                        open: true,
+                        type: 'error',
+                        message: "La contraseña no puede ser vacia"
+                    });
+                    return;
+                }
+                const data = {
+                    id,
+                    contrasena: result.value,
+                };
+                console.log(data);
+                try {
+                    const { status, msg: message} = await callWebService({
+                        endpoint: 'actualizar-contrasena',
+                        method: 'POST',
+                        data,
+                    });
+                    setAlertContent({
+                        open: true,
+                        type: status,
+                        message
+                    });
+                } catch (error) {
+                    setAlertContent({
+                        open: true,
+                        type: "error",
+                        message: error.reason
+                    });
+                }
+            }
+          })
+    }
+
     const closeModalEdit = () => { 
         setDialogInfo((prev) => ({ ...prev, open: false}));
         loadData();
@@ -119,7 +162,7 @@ const UserList = () => {
                         </IconButton>
                     </Tooltip>
                     <Tooltip title="Cambiar contraseña">
-                        <IconButton onClick={() => deleteUser(param.row.id)}>
+                        <IconButton onClick={() => changePassword(param.row.id)}>
                             <LockPersonIcon />
                         </IconButton>
                     </Tooltip>

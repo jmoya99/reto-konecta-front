@@ -169,7 +169,7 @@ const Login = () => {
                         </Grid>
                     </CardContent>
                 </Card>
-                <Alert {...alertContent.open} setOpen={setOpen} />
+                <Alert {...alertContent} setOpen={setOpen} />
             </Grid>
         </Grid>
     )
